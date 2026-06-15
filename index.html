@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><title>Zed Bot Client</title>
+<style>body { font-family: sans-serif; background: #0b0f19; color: #fff; text-align: center; padding: 20px; } .card { background: #111827; padding: 22px; border-radius: 12px; display: inline-block; text-align: right; width: 440px; border: 1px solid #1f2937; } input, textarea { width: 95%; padding: 10px; margin: 8px 0; background: #1f2937; color: #fff; border: 1px solid #374151; }</style></head>
+<body>
+    <h2>🤖 تطبيق تفعيل وتشغيل Zed Bot</h2>
+    <div class="card">
+        <label>🔑 اسم المستخدم (Username):</label> <input type="text" id="username">
+        <label>🔒 كلمة المرور (Password):</label> <input type="password" id="password">
+        <label>📥 كود الـ AppState (C3C FBState):</label> <textarea id="appstate_input" rows="5"></textarea>
+        <button onclick="startSystem()" style="background:#00ea91; width:100%; padding:12px; font-weight:bold; cursor:pointer; margin-top:10px;">🚀 تفعيل وتشغيل البوت فوراً</button>
+        <div id="status_txt" style="text-align:center; margin-top:15px; font-weight:bold; color:#cbd5e1;">🟢 مستعد بانتظار بياناتك...</div>
+    </div>
+    <script>
+        const fs = require('fs'); const path = require('path');
+        function startSystem() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            let rawState = document.getElementById('appstate_input').value.trim();
+            const statusTxt = document.getElementById('status_txt');
+            if (!user || !pass || !rawState) { alert("⚠️ يرجى ملء الخانات!"); return; }
+
+            statusTxt.innerHTML = "⏳ جاري فحص وتطهير الكود...";
+            // 🔥 الفلتر السحري لإزالة السطور والمسافات الخفية المفسدة للـ JSON تماماً وتحويلها لسطر واحد صافي
+            rawState = rawState.replace(/[\r\n\t]+/g, " ");
+            if (!rawState.startsWith('[')) rawState = '[' + rawState + ']';
+
+            try { 
+                JSON.parse(rawState); 
+                fs.writeFileSync(path.join(__dirname, 'appstate.json'), JSON.stringify(JSON.parse(rawState), null, 2), 'utf8');
+            } catch(e) { statusTxt.innerHTML = "❌ خطأ: كود الـ AppState غير صحيح أو تالف!"; return; }
+
+            const tempLogin = { username: user, password: pass };
+            fs.writeFileSync(path.join(__dirname, 'temp_login.json'), JSON.stringify(tempLogin), 'utf8');
+            statusTxt.innerHTML = "🔐 جاري الاتصال والتفعيل الحركي...";
+            try { require('./index.js'); statusTxt.innerHTML = "⚡ [نجاح ساحق] انطلق البوت حياً بالخلفية!"; } catch(err) { statusTxt.innerHTML = "❌ خطأ: " + err.message; }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "mahoraga-client-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "latest",
+    "express": "^4.19.2",
+    "puppeteer": "^22.11.0"
+  }
+}
