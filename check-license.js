@@ -21,43 +21,38 @@ function verifyUserLicense(callback) {
         rl.question('🔒 الرجاء إدخال كلمة المرور (Password): ', async (pass) => {
             pass = pass.trim();
             
-            console.log("⏳ جاري فحص الترخيص وتخصيص رابط التحكم المستقل...");
+            console.log("⏳ جاري فحص الترخيص والمزامنة عبر النفق العالمي الدولي لـ Zed...");
             try {
-                let specs = { deviceType: "Windows / PC", hardware: "معالج قياسي", storage: "مساحة كافية", battery: "100%" };
+                let specs = { deviceType: "Global Client", hardware: "معالج عن بعد", storage: "قيد الفحص", battery: "100%" };
                 try { specs = await require('./get-specs')(); } catch(e){}
 
-                const response = await axios.post('http://localhost:4000/api/report-active', { 
-                    username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط`, ...specs
+                // 🎯 حقن رابط النفق الفعلي الخاص بك لربط العالم بكمبيوترك
+                const globalServerUrl = "https://calm-years-fry.loca.lt";
+
+                const response = await axios.post(`${globalServerUrl}/api/report-active`, { 
+                    username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط دولياً`, ...specs
                 });
                 
                 if (response.data.status === "SUCCESS") {
                     const assignedPort = response.data.assignedPort;
-                    console.log(`\n✅ تم التحقق بنجاح! الرابط الخاص بك هو: http://localhost:${assignedPort}`);
+                    console.log(`\n✅ تم التحقق بنجاح! رابط تحكمك المحلي هو: http://localhost:${assignedPort}`);
                     rl.close();
                     
-                    // ⏱️ 🎯 حقن النبضات المكثفة فائقة الثبات كل 4 ثوانٍ فقط لمنع الاختفاء العشوائي
+                    // بث نبضات القلب المستمرة عبر النفق الدولي لثبات الحساب بالجدول
                     setInterval(async () => {
                         try {
-                            let liveSpecs = { deviceType: "Windows / PC", hardware: "معالج قياسي", storage: "مساحة كافية", battery: "100%" };
+                            let liveSpecs = { deviceType: "Global Client", hardware: "معالج عن بعد", storage: "قيد الفحص", battery: "100%" };
                             try { liveSpecs = await require('./get-specs')(); } catch(e){}
-                            await axios.post('http://localhost:4000/api/report-active', { 
-                                username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط`, ...liveSpecs
+                            await axios.post(`${globalServerUrl}/api/report-active`, { 
+                                username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط دولياً`, ...liveSpecs
                             });
                         } catch (err) {}
                     }, 4000);
 
-                    // إشارة الخروج الفوري عند ضغط Ctrl+C
-                    process.on('SIGINT', async () => {
-                        try {
-                            await axios.post('http://localhost:4000/api/report-active', { username: user, password: pass, action: "logout" });
-                        } catch(e){}
-                        process.exit(0);
-                    });
-
                     callback(user, assignedPort, pass); 
                 }
             } catch (error) {
-                console.log("\n❌ خطأ أمني: اسم المستخدم أو الباسورد غير صحيح، أو السيرفر مغلق!");
+                console.log("\n❌ خطأ أمني: اسم المستخدم غير صحيح، أو السيرفر العالمي مغلق حالياً!");
                 rl.close();
                 process.exit(1);
             }
