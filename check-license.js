@@ -21,30 +21,26 @@ function verifyUserLicense(callback) {
         rl.question('🔒 الرجاء إدخال كلمة المرور (Password): ', async (pass) => {
             pass = pass.trim();
             
-            console.log("⏳ جاري فحص الترخيص والمزامنة عبر النفق العالمي الدولي لـ Zed...");
+            console.log("⏳ جاري فحص الترخيص والمزامنة عبر النفق العالمي الأبدي لـ Zed...");
             try {
-                let specs = { deviceType: "Global Client", hardware: "معالج عن بعد", storage: "قيد الفحص", battery: "100%" };
+                let specs = { deviceType: "Global Server", hardware: "معالج سحابي مدمج", storage: "مساحة معزولة", battery: "100%" };
                 try { specs = await require('./get-specs')(); } catch(e){}
 
-                // 🎯 حقن رابط النفق الفعلي الخاص بك لربط العالم بكمبيوترك
-                const globalServerUrl = "https://calm-years-fry.loca.lt";
+                const globalServerUrl = "https://ngrok-free.dev";
 
                 const response = await axios.post(`${globalServerUrl}/api/report-active`, { 
-                    username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط دولياً`, ...specs
+                    username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط سحابياً`, ...specs
                 });
                 
                 if (response.data.status === "SUCCESS") {
                     const assignedPort = response.data.assignedPort;
-                    console.log(`\n✅ تم التحقق بنجاح! رابط تحكمك المحلي هو: http://localhost:${assignedPort}`);
+                    console.log(`\n✅ تم التحقق بنجاح! رابط تحكمك السحابي هو: http://localhost:${assignedPort}`);
                     rl.close();
                     
-                    // بث نبضات القلب المستمرة عبر النفق الدولي لثبات الحساب بالجدول
                     setInterval(async () => {
                         try {
-                            let liveSpecs = { deviceType: "Global Client", hardware: "معالج عن بعد", storage: "قيد الفحص", battery: "100%" };
-                            try { liveSpecs = await require('./get-specs')(); } catch(e){}
                             await axios.post(`${globalServerUrl}/api/report-active`, { 
-                                username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط دولياً`, ...liveSpecs
+                                username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط سحابياً`, ...specs
                             });
                         } catch (err) {}
                     }, 4000);
