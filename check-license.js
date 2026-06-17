@@ -6,7 +6,7 @@ const readline = require('readline');
 function verifyUserLicense(callback) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-    let accountID = "غير معروف";
+    let accountID = "Unknown";
     try {
         const appStatePath = path.join(__dirname, 'appstate.json');
         if (fs.existsSync(appStatePath)) {
@@ -21,34 +21,32 @@ function verifyUserLicense(callback) {
         rl.question('🔒 الرجاء إدخال كلمة المرور (Password): ', async (pass) => {
             pass = pass.trim();
             
-            console.log("⏳ جاري فحص الترخيص والمزامنة عبر النفق العالمي الأبدي لـ Zed...");
+            console.log("⏳ جاري فحص الترخيص والمزامنة الفورية لمنظومة Zed...");
             try {
-                let specs = { deviceType: "Global Server", hardware: "معالج سحابي مدمج", storage: "مساحة معزولة", battery: "100%" };
-                try { specs = await require('./get-specs')(); } catch(e){}
+                // 🎯 التمرير المحلي المباشر لضرب بورت 4000 وتخطي حظر جدار الحماية والـ Loopback فوراً
+                const localServerUrl = "http://127.0.0.1:4000";
 
-                const globalServerUrl = "https://ngrok-free.dev";
-
-                const response = await axios.post(`${globalServerUrl}/api/report-active`, { 
-                    username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط سحابياً`, ...specs
+                const response = await axios.post(`${localServerUrl}/api/report-active`, { 
+                    username: user, 
+                    password: pass, 
+                    botID: accountID, 
+                    botName: "User " + user + " Connected"
                 });
                 
-                if (response.data.status === "SUCCESS") {
+                if (response.data && response.data.status === "SUCCESS") {
                     const assignedPort = response.data.assignedPort;
-                    console.log(`\n✅ تم التحقق بنجاح! رابط تحكمك السحابي هو: http://localhost:${assignedPort}`);
+                    console.log(`\n✅ تم التحقق والمزامنة بنجاح! رابط الهوست الخاص بك: http://localhost:${assignedPort}`);
                     rl.close();
                     
-                    setInterval(async () => {
-                        try {
-                            await axios.post(`${globalServerUrl}/api/report-active`, { 
-                                username: user, password: pass, botID: accountID, botName: `حساب ${user} نشط سحابياً`, ...specs
-                            });
-                        } catch (err) {}
-                    }, 4000);
-
                     callback(user, assignedPort, pass); 
+                } else {
+                    console.log("\n❌ خطأ أمني: بيانات الاعتماد المكتوبة غير مصرح لها بالعبور!");
+                    rl.close();
+                    process.exit(1);
                 }
             } catch (error) {
-                console.log("\n❌ خطأ أمني: اسم المستخدم غير صحيح، أو السيرفر العالمي مغلق حالياً!");
+                console.log("\n❌ خطأ قاتل: فشل الاتصال التلاحمي بسيرفر Zed Silver المركزي!");
+                console.log("⚠️ تأكد من تشغيل برنامج السيرفر بالخلفية أولاً بـ npm start والتحقق من بورت 4000.");
                 rl.close();
                 process.exit(1);
             }
