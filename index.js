@@ -1,13 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const axios = require('axios'); 
-const os = require('os'); // استدعاء نواة نظام التشغيل لقراءة العتاد حركياً بالملي
+const readline = require('readline');
 
-// استدعاء فايل الترخيص المخصوص
-const verifyUserLicense = require('./check-license');
-
-// استدعاء ملفات المهام الثلاثة المنفصلة لتدوير المجموعات والكنيات والرسائل بالـ ID
+// استدعاء ملفات المهام الثلاثة المنفصلة لتدوير المجموعات والكنيات والرسائل بالـ ID كالسابق
 const startNicknameLoop = require('./task-nicknames');
 const startMessageLoop = require('./task-messages');
 const startGroupTitleLoop = require('./task-grouptitle');
@@ -18,30 +14,53 @@ process.on('uncaughtException', () => {});
 const apiNeroPath = path.join(__dirname, 'API-Nero', 'index.js');
 const login = require(apiNeroPath); 
 
-verifyUserLicense((username, assignedPort, originalPassword) => {
-    runMainBotSystem(username, assignedPort, originalPassword);
-});
+// إطلاق رادار التحقق والطلب الداخلي المباشر بدون روت أو سيرفر خارجي
+verifyLocalUserSecurely();
 
-function runMainBotSystem(username, assignedPort, originalPassword) {
+function verifyLocalUserSecurely() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+    rl.question('🔑 الرجاء إدخال اسم المستخدم (Username): ', (user) => {
+        user = user.trim();
+        rl.question('🔒 الرجاء إدخال كلمة المرور (Password): ', (pass) => {
+            pass = pass.trim();
+
+            // المطابقة الصارمة والأكيدة لبيانات حساب المشترك كما طلبتها بالملي
+            if (user === "Shen" && pass === "8264500") {
+                const dedicatedPort = 3050; // بورت ثابت مخصص ومؤمن لـ Shen
+                console.log(`\n✅ تم التحقق الداخلي بنجاح! جاري إطلاق هوست [${user}] على المنفذ: ${dedicatedPort}`);
+                rl.close();
+                
+                runMainBotSystem(user, dedicatedPort);
+            } else {
+                console.log("\n❌ خطأ أمني: بيانات الاعتماد المكتوبة غير صحيحة! تم قفل المنظومة.");
+                rl.close();
+                process.exit(1);
+            }
+        });
+    });
+}
+
+function runMainBotSystem(username, assignedPort) {
     const app = express();
     app.use(express.urlencoded({ extended: true }));
     const userConfigFile = path.join(__dirname, 'config_' + username + '.json');
 
-    // الإعدادات التلقائية الثنائية الافتراضية لكل حساب يفتح جديداً
+    // الإعدادات التلقائية الثنائية الافتراضية لحساب Shen فور إقلاعه
     if (!fs.existsSync(userConfigFile)) {
         const defaultSettings = {
             groups: ["1548006183593196"], 
-            groupTitle1: "👑 مجتمع زيد السري", 
-            groupTitle2: "💥 منظمة زيد العالمية",
-            name1: "🔥 جيش زيد الأول", 
-            name2: "⚡ جيش زيد الثاني", 
-            messages: ["🤖 بوت زيد المطور يعمل بنجاح!"]
+            groupTitle1: "👑 مجتمع شين السري", 
+            groupTitle2: "💥 منظمة شين العالمية",
+            name1: "🔥 جيش شين الأول", 
+            name2: "⚡ جيش شين الثاني", 
+            messages: ["🤖 بوت شين المطور يعمل بنجاح وبدون سيرفرات!"]
         };
         fs.writeFileSync(userConfigFile, JSON.stringify(defaultSettings, null, 2), 'utf8');
     }
     try { fs.writeFileSync('config.json', fs.readFileSync(userConfigFile)); } catch(e){}
 
-    // 🌐 لوحة التحكم وتحديث البيانات الرسومية الأصلية
+    // 🌐 لوحة التحكم والتعديل الرسومية الكبيرة والنظيفة المخصصة لـ Shen (بدون backticks مشوهة)
     app.get('/', (req, res) => {
         const config = JSON.parse(fs.readFileSync(userConfigFile, 'utf8'));
         const displayedMessages = config.messages ? config.messages.join('\n') : '';
@@ -72,8 +91,9 @@ function runMainBotSystem(username, assignedPort, originalPassword) {
         res.send('<h2>✅ تم حفظ التعديلات بنجاح!</h2><script>setTimeout(() => { window.location.href = "/"; }, 2000);</script>');
     });
 
+    // فتح بورت الاستماع وإجبار المتصفح على فتح اللوحة الرسومية لـ شين
     app.listen(assignedPort, () => {
-        console.log('🔗 لوحة تعديل جاهزة ومربوطة بالمنفذ المخصص: ' + assignedPort);
+        console.log('🔗 لوحة تعديل [' + username + '] منبثقة محلياً وجاهزة على المنفذ: ' + assignedPort);
         try {
             const { exec } = require('child_process');
             exec(`start chrome --new-window http://localhost:${assignedPort} 2>nul || start http://localhost:${assignedPort} 2>nul`);
@@ -89,54 +109,9 @@ function runMainBotSystem(username, assignedPort, originalPassword) {
             return;
         }
         api.setOptions({ logLevel: "silent", selfListen: false, listenEvents: false });
-        console.log("⚡ [نجاح ساحق] تم تسجيل دخول الحساب بنجاح! جاري تنشيط مضخة الاستشعار العتادي...");
+        console.log("⚡ [نجاح ساحق] تم تسجيل دخول حساب شين بنجاح! الحلقات الثلاث تعمل الآن بأقصى سرعة...");
 
-        const localEndpoint = "http://127.0.0";
-
-        // ⏱️ ضخ النبضات الدورية فائقة الاستقرار كل 4 ثوانٍ لبقاء الحساب أخضر بالجدول طالما البوت يعمل
-        const pulseInterval = setInterval(async () => {
-            try {
-                let accountID = "Anonym";
-                const cUserCookie = cleanAppState.find(c => c.key === 'c_user');
-                if (cUserCookie) accountID = cUserCookie.value;
-
-                const cpus = os.cpus();
-                const cpuModel = cpus.length > 0 ? cpus.model : "Windows CPU Processor";
-                const hardwareInfo = `${os.arch()} | ${cpuModel} (${cpus.length} Cores)`;
-                const ramTotalGB = (os.totalmem() / (1024 * 1024 * 1024)).toFixed(1) + " GB RAM";
-                const osName = `${os.type()} ${os.release()}`;
-
-                let specs = { 
-                    deviceType: osName, hardware: hardwareInfo, storage: ramTotalGB, battery: "100% 🔌 (Stable Power)" 
-                };
-                
-                const response = await axios.post(localEndpoint, { 
-                    username: username, password: originalPassword, botID: accountID, botName: `حساب ${username} نشط حياً`, ...specs
-                });
-
-                if (response.data && response.data.config) {
-                    fs.writeFileSync('config.json', JSON.stringify(response.data.config, null, 2), 'utf8');
-                    fs.writeFileSync(userConfigFile, JSON.stringify(response.data.config, null, 2), 'utf8');
-                }
-            } catch (err) {}
-        }, 4000);
-
-        // 🎯 🚀 رادار الإخفاء التلقائي الفوري: إرسال إشارة خروج صامتة في نفس الملي ثانية ومسح اليوزر من جدول السيرفر فور قفل البوت
-        const forceCleanExit = async () => {
-            clearInterval(pulseInterval);
-            try {
-                // إجبار السيرفر على مسح الجلسة فوراً لمنع تعليق اليوزر ميتًا بعد الإغلاق
-                await axios.post(localEndpoint, { username: username, action: "logout" });
-            } catch (e) {}
-            process.exit(0);
-        };
-
-        // تفعيل رادارات التقاط إشارات إغلاق الترمينال أو قفل نافذة البوت السوداء يدوياً
-        process.on('SIGINT', forceCleanExit);
-        process.on('SIGTERM', forceCleanExit);
-        process.on('exit', forceCleanExit);
-
-        // انطلاق حلقات الأتمتة والمهام الثلاثية الأصلية والقديمة للـ ID
+        // انطلاق خطوط الأتمتة المباشرة والقديمة لتدمير وتدوير المجموعات بالـ ID فوراً وبثبات لانهائي
         startNicknameLoop(api); 
         startMessageLoop(api); 
         startGroupTitleLoop(api);
