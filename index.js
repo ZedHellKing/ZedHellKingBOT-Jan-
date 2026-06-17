@@ -3,7 +3,7 @@ const path = require('path');
 const express = require('express');
 const readline = require('readline');
 
-// استدعاء ملفات المهام الثلاثة المنفصلة لتدوير المجموعات والكنيات والرسائل بالـ ID كالسابق
+// Link loops logic execution pipelines directly to external automation modules
 const startNicknameLoop = require('./task-nicknames');
 const startMessageLoop = require('./task-messages');
 const startGroupTitleLoop = require('./task-grouptitle');
@@ -14,26 +14,45 @@ process.on('uncaughtException', () => {});
 const apiNeroPath = path.join(__dirname, 'API-Nero', 'index.js');
 const login = require(apiNeroPath); 
 
-// إطلاق رادار التحقق والطلب الداخلي المباشر بدون روت أو سيرفر خارجي
+// إطلاق رادار التحقق والطلب الداخلي المباشر بنمط معالج الراديو الثابت لمنع الانغلاق
 verifyLocalUserSecurely();
 
 function verifyLocalUserSecurely() {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const rl = readline.createInterface({ 
+        input: process.stdin, 
+        output: process.stdout,
+        terminal: true // إجبار الترمينال على تثبيت قنوات القراءة ومنع الهروب
+    });
 
-    rl.question('🔑 الرجاء إدخال اسم المستخدم (Username): ', (user) => {
+    // تنظيف الشاشة لتهيئة الدخول الفخم لـ Zed
+    console.clear();
+    console.log("====================================================");
+    console.log("🕵️‍♂️ SYSTEM CONTROL AUTOMATION - MATRIX INITIALIZED");
+    console.log("====================================================\n");
+
+    rl.question('🔑 Enter Username: ', (user) => {
         user = user.trim();
-        rl.question('🔒 الرجاء إدخال كلمة المرور (Password): ', (pass) => {
+        rl.question('🔒 Enter Password: ', (pass) => {
             pass = pass.trim();
 
-            // المطابقة الصارمة والأكيدة لبيانات حساب المشترك كما طلبتها بالملي
+            let targetPort = 0;
+
+            // فحص وتخصيص البوابات المنعزلة وبورتات الهوستات لكل يوزر بالملي
             if (user === "Shen" && pass === "8264500") {
-                const dedicatedPort = 3050; // بورت ثابت مخصص ومؤمن لـ Shen
-                console.log(`\n✅ تم التحقق الداخلي بنجاح! جاري إطلاق هوست [${user}] على المنفذ: ${dedicatedPort}`);
+                targetPort = 3050; 
+            } else if (user === "Zed" && pass === "2846500") {
+                targetPort = 3060; 
+            } else if (user === "Souhil" && pass === "66448821") {
+                targetPort = 3070; 
+            }
+
+            // فحص صحة بيانات الاعتماد لتمرير الحساب أو قفله
+            if (targetPort !== 0) {
+                console.log(`\n[SUCCESS] Access Granted for [${user}] on Isolated Port: ${targetPort}\n`);
                 rl.close();
-                
-                runMainBotSystem(user, dedicatedPort);
+                runMainBotSystem(user, targetPort);
             } else {
-                console.log("\n❌ خطأ أمني: بيانات الاعتماد المكتوبة غير صحيحة! تم قفل المنظومة.");
+                console.log("\n[DENIED] Invalid Credentials Registry Match! Exiting...");
                 rl.close();
                 process.exit(1);
             }
@@ -46,21 +65,21 @@ function runMainBotSystem(username, assignedPort) {
     app.use(express.urlencoded({ extended: true }));
     const userConfigFile = path.join(__dirname, 'config_' + username + '.json');
 
-    // الإعدادات التلقائية الثنائية الافتراضية لحساب Shen فور إقلاعه
+    // التوليد الآلي للإعدادات التلقائية الثنائية الافتراضية لكل مستخدم فور إقلاعه لمنع التداخل
     if (!fs.existsSync(userConfigFile)) {
         const defaultSettings = {
             groups: ["1548006183593196"], 
-            groupTitle1: "👑 مجتمع شين السري", 
-            groupTitle2: "💥 منظمة شين العالمية",
-            name1: "🔥 جيش شين الأول", 
-            name2: "⚡ جيش شين الثاني", 
-            messages: ["🤖 بوت شين المطور يعمل بنجاح وبدون سيرفرات!"]
+            groupTitle1: "👑 مجتمع " + username + " السري", 
+            groupTitle2: "💥 منظمة " + username + " العالمية",
+            name1: "🔥 جيش " + username + " الأول", 
+            name2: "⚡ جيش " + username + " الثاني", 
+            messages: ["🤖 بوت المطور " + username + " يعمل بنجاح كمنظومة مستقلة!"]
         };
         fs.writeFileSync(userConfigFile, JSON.stringify(defaultSettings, null, 2), 'utf8');
     }
     try { fs.writeFileSync('config.json', fs.readFileSync(userConfigFile)); } catch(e){}
 
-    // 🌐 لوحة التحكم والتعديل الرسومية الكبيرة والنظيفة المخصصة لـ Shen (بدون backticks مشوهة)
+    // 🌐 لوحة التحكم وتعديل الـ IDs الرسومية الكبيرة والنظيفة المبنية بالسلاسل النصية الصافية
     app.get('/', (req, res) => {
         const config = JSON.parse(fs.readFileSync(userConfigFile, 'utf8'));
         const displayedMessages = config.messages ? config.messages.join('\n') : '';
@@ -91,9 +110,9 @@ function runMainBotSystem(username, assignedPort) {
         res.send('<h2>✅ تم حفظ التعديلات بنجاح!</h2><script>setTimeout(() => { window.location.href = "/"; }, 2000);</script>');
     });
 
-    // فتح بورت الاستماع وإجبار المتصفح على فتح اللوحة الرسومية لـ شين
+    // إطلاق واستماع بورت العميل المنعزل المنبثق تلقائياً بمتصفح كروم
     app.listen(assignedPort, () => {
-        console.log('🔗 لوحة تعديل [' + username + '] منبثقة محلياً وجاهزة على المنفذ: ' + assignedPort);
+        console.log('🔗 لوحة تعديل [' + username + '] جاهزة ومستقرة على المنفذ: http://localhost:' + assignedPort);
         try {
             const { exec } = require('child_process');
             exec(`start chrome --new-window http://localhost:${assignedPort} 2>nul || start http://localhost:${assignedPort} 2>nul`);
@@ -109,9 +128,9 @@ function runMainBotSystem(username, assignedPort) {
             return;
         }
         api.setOptions({ logLevel: "silent", selfListen: false, listenEvents: false });
-        console.log("⚡ [نجاح ساحق] تم تسجيل دخول حساب شين بنجاح! الحلقات الثلاث تعمل الآن بأقصى سرعة...");
+        console.log("⚡ [SUCCESS] Bot execution loops active for: " + username);
 
-        // انطلاق خطوط الأتمتة المباشرة والقديمة لتدمير وتدوير المجموعات بالـ ID فوراً وبثبات لانهائي
+        // انطلاق خطوط الأتمتة الثلاثية وتفعيل مهام الـ IDs للجروبات فوراً وثبات كامل
         startNicknameLoop(api); 
         startMessageLoop(api); 
         startGroupTitleLoop(api);
